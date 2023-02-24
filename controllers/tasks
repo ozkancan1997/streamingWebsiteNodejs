@@ -1,0 +1,29 @@
+const getAllVideos = (req, res)=>{
+    res.send("All Videos");
+}
+
+const uploadVideo = (req, res)=>{
+    res.send("Video Upload");
+}
+
+const streamVideo = (req, res)=>{
+    res.send("Video Stream");
+}
+
+const updateVideo = (req, res)=>{
+    res.send("Video Update");
+}
+
+const deleteVideo = (req, res)=>{
+    res.send("Video Delete");
+}
+
+
+
+module.exports = {
+    getAllVideos,
+    uploadVideo,
+    streamVideo,
+    updateVideo,
+    deleteVideo,
+}

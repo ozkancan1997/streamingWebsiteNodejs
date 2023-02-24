@@ -1,0 +1,22 @@
+{
+  "name": "streamingwebsitenodejs",
+  "version": "1.0.0",
+  "description": "Streaming website with node.js. Aryom Software Internship, Feb. 24th 2023. Özkan CAN",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ozkancan1997/streamingWebsiteNodejs.git"
+  },
+  "author": "Özkan CAN (Voyager)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ozkancan1997/streamingWebsiteNodejs/issues"
+  },
+  "homepage": "https://github.com/ozkancan1997/streamingWebsiteNodejs#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

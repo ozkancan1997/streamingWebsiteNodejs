@@ -1,27 +1,86 @@
-const getAllVideos = (req, res)=>{
-    res.send("All Videos");
+const Video = require('../Models/Video');
+const fs = require('fs');
+const path = require('path');
+
+const getAllVideos = async (req, res)=>{
+    try {
+        const allVideos = await Video.find({});
+        res.status(200).json({allVideos});
+    } catch (error) {
+        res.status(500).json({message : error});
+    }
+}
+
+const registerVideo = async (req, res)=>{
+    try {
+        const video = await Video.create(req.body);
+        res.status(201).json({video});
+    } catch (error) {
+        res.status(500).json({message : error});
+    }
 }
 
 const uploadVideo = (req, res)=>{
-    res.send("Video Upload");
+    let sampleFile;
+    let uploadPath;
+  
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).send('No files were uploaded.');
+    }
+  
+    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+    sampleFile = req.files.uploaded;
+    uploadPath = __dirname+'/../videos/' + sampleFile.name;
+    
+    // console.log(req.files);
+
+    // Use the mv() method to place the file somewhere on your server
+    sampleFile.mv(uploadPath, function(err) {
+      if (err)
+        return res.status(500).send(err);
+  
+      res.send('File uploaded!');
+    });
+
 }
 
-const streamVideo = (req, res)=>{
-    res.send("Video Stream");
+const streamVideo = async (req, res)=>{
+    const videoID = req.params.id;
+    try {
+        const video = await Video.findOne({_id : videoID});
+        if(!video){
+            res.status(404).json({message : "No such video"});
+            return;
+        }
+        res.status(200).json({video});
+    } catch (error) {
+        res.status(500).json({ message : error});
+    }
 }
 
 const updateVideo = (req, res)=>{
-    res.send("Video Update");
+    res.json({id : req.params.id, desc : req.body.desc});
 }
 
-const deleteVideo = (req, res)=>{
-    res.send("Video Delete");
+const deleteVideo = async (req, res)=>{
+    const videoID = req.params.id;
+    try {
+        const deletedVideo = await Video.findOneAndDelete({_id : videoID});
+        if(!deletedVideo){
+            res.status(404).json({ message : "No such video"});
+            return;
+        }
+        res.status(200).json({ deletedVideo });
+    } catch (error) {
+        res.status(500).json({ message : error});
+    }
 }
 
 
 
 module.exports = {
     getAllVideos,
+    registerVideo,
     uploadVideo,
     streamVideo,
     updateVideo,

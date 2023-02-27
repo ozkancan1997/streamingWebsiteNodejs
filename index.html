@@ -7,6 +7,9 @@
     <title>Document</title>
 </head>
 <body>
-    <video src="/video" width="1280" controls></video>
+    <form action="/api/v1/videos/upload" enctype="multipart/form-data" method="post">
+    <input name="uploaded" type="file">
+    <button>Submit</button>
+</form>
 </body>
 </html>

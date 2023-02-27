@@ -4,7 +4,7 @@
   "description": "Streaming website with node.js. Aryom Software Internship, Feb. 24th 2023. Özkan CAN",
   "main": "app.js",
   "scripts": {
-    "start" : "nodemon app.js"
+    "start": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/ozkancan1997/streamingWebsiteNodejs#readme",
   "dependencies": {
+    "connect-busboy": "^1.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-fileupload": "^1.4.0",
     "mongoose": "^5.11.10"
   },
   "devDependencies": {

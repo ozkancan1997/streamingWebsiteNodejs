@@ -1,10 +1,18 @@
 const Video = require('../Models/Video');
 const fs = require('fs');
 const path = require('path');
+path.resolve();
+
+const getIndex = (req, res) =>{
+    res.status(200).sendFile(path.join(__dirname,'..','index.html'))
+}
 
 const getAllVideos = async (req, res)=>{
+    let allVideos;
     try {
-        const allVideos = await Video.find({});
+        if(req.params.query=='*'){allVideos = await Video.find({});}
+        else{allVideos = await Video.find({ name : req.params.query})}
+        console.log(req.params.query)
         res.status(200).json({allVideos});
     } catch (error) {
         res.status(500).json({message : error});
@@ -44,7 +52,8 @@ const uploadVideo = (req, res)=>{
 
 }
 
-const streamVideo = async (req, res)=>{
+const bringVideo = async (req, res)=>{
+    console.log("bring")
     const videoID = req.params.id;
     try {
         const video = await Video.findOne({_id : videoID});
@@ -52,10 +61,33 @@ const streamVideo = async (req, res)=>{
             res.status(404).json({message : "No such video"});
             return;
         }
-        res.status(200).json({video});
+        console.log("ulaşıldı")
+        res.status(200).sendFile(path.join(__dirname,'..','stream.html'))
     } catch (error) {
         res.status(500).json({ message : error});
-    }
+    }    
+}
+
+const streamVideo = async (req, res)=>{
+    let range, videoPath, videoSize, chunkSize, start, end, readStream, contentLength;
+    range = req.headers.range;
+    if(!range) range='0';
+    videoPath = path.join(__dirname,'..', 'videos',req.params.id+'.mp4');
+    videoSize = fs.statSync(videoPath).size;
+    chunkSize = 1000000;
+    start = Number(range.replace(/\D/g, ""));
+    end = Math.min(start + chunkSize, videoSize-1);
+    readStream = fs.createReadStream(videoPath, {start, end});
+    contentLength = end - start + 1;
+    res.writeHead(206,{
+        "Content-Range" : `bytes ${start} - ${end}/${videoSize}`,
+        "Accept-Ranges" : "bytes",
+        "Content-Length" : contentLength,
+        "Content-Type" : "video/mp4"
+
+    })
+    readStream.pipe(res);
+    console.log("video")
 }
 
 const updateVideo = (req, res)=>{
@@ -79,9 +111,11 @@ const deleteVideo = async (req, res)=>{
 
 
 module.exports = {
+    getIndex,
     getAllVideos,
     registerVideo,
     uploadVideo,
+    bringVideo,
     streamVideo,
     updateVideo,
     deleteVideo,

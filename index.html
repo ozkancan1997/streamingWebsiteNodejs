@@ -7,9 +7,54 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="/api/v1/videos/upload" enctype="multipart/form-data" method="post">
+    <!-- <form action="/api/v1/videos/upload" enctype="multipart/form-data" method="post">
     <input name="uploaded" type="file">
+    <button>Submit</button> -->
+    <div>
+    <h1>Videos</h1>
+    <ul id="videos">
+    </ul>
+
+    <form name="search" id="search" >
+    <input placeholder="" name="q" type="text" id="searchbar">
     <button>Submit</button>
+    </form>
+    </div>
+    <script>
+        let searchForm = document.getElementById('search');
+        let bar = document.getElementById('searchbar');
+        let videolist = document.getElementById('videos')
+
+        const listvideos = async () =>{
+            videolist.replaceChildren([])
+            let query;
+            if(bar.value) query=bar.value;
+            else query='*'
+            const res = await fetch('/api/v1/videos/search/'+query, {headers : {'Content-Type' : 'application/json'}});
+            const videos=  await res.json()
+            
+
+            videos.allVideos.forEach(element => {
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.innerText = `${element.name} ${element.desc} ${element._id}`;
+                link.href = '/api/v1/videos/' + element._id;
+                li.appendChild(link)
+                videolist.appendChild(li)
+            });
+
+        }
+        listvideos()
+
+
+
+        searchForm.addEventListener('submit', async (e)=>{
+            e.preventDefault();
+            listvideos()
+        })
+        
+
+    </script>
 </form>
 </body>
 </html>

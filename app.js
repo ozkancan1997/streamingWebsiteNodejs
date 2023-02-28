@@ -15,10 +15,6 @@ app.use(upload({
 }));
 
 
-//routes 
-app.get('/hello', (req,res)=>{
-    res.sendFile(path.join(__dirname,'index.html'));
-});
 
 
 //app.get(/api/v1/videos) list all videos

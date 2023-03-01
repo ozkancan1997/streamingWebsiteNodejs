@@ -105,6 +105,3 @@ dist
 
 # Example Video
 *.mp4
-
-# Database
-db/

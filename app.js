@@ -5,15 +5,27 @@ const tasks = require('./routes/tasks');
 const connectDB = require('./db/connect');
 const upload = require('express-fileupload')
 const path = require('path')
-require('dotenv').config();
+const flash = require('express-flash')
+const session = require('express-session');
+const passport = require('passport');
 
+if(process.env.NODE_ENV !== 'production') require('dotenv').config();
 
+app.set('view engine', 'ejs');
+app.use(express.urlencoded({extended : false}))
 app.use(express.json());
 app.use(upload({
     useTempFiles : true,
     tempFileDir : '/tmp/'
 }));
-
+app.use(flash())
+app.use(session({
+    secret : process.env.SESSION_SECRET,
+    resave : false,
+    saveUninitialized : false
+}))
+app.use(passport.initialize())
+app.use(passport.session())
 
 
 
@@ -23,7 +35,7 @@ app.use(upload({
 //app.patch(/api/v1/videos/:id) update a video
 //app.delete(/api/v1/videos/:id) delete a video
 //All in one
-app.use('/api/v1/videos', tasks); 
+app.use('/api/v1', tasks); 
 
 const start = async () => {
     try {

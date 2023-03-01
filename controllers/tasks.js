@@ -1,10 +1,20 @@
 const Video = require('../Models/Video');
+const User = require('../Models/User');
 const fs = require('fs');
 const path = require('path');
+const passport = require('passport')
+const localStrategy = require('passport-local')
+const bcrypt = require('bcrypt')
+const initializePassport = require('../passportconfig');
+
+initializePassport(passport, (email) =>{
+    return User.findOne({email})
+});
+
 path.resolve();
 
 const getIndex = (req, res) =>{
-    res.status(200).sendFile(path.join(__dirname,'..','index.html'))
+    res.status(200).render(path.join(__dirname,'..','views','index.ejs'))
 }
 
 const getAllVideos = async (req, res)=>{
@@ -62,7 +72,7 @@ const bringVideo = async (req, res)=>{
             return;
         }
         console.log("ulaşıldı")
-        res.status(200).sendFile(path.join(__dirname,'..','stream.html'))
+        res.status(200).render(path.join(__dirname,'..','views','stream.ejs'))
     } catch (error) {
         res.status(500).json({ message : error});
     }    
@@ -108,6 +118,38 @@ const deleteVideo = async (req, res)=>{
     }
 }
 
+const getLoginPage = async (req, res)=>{
+    res.status(200).render(path.join(__dirname,'..','views','login.ejs'))
+}
+
+const login = async (req,res,next) =>{
+    console.log(req.body)
+    passport.authenticate('local', {
+    successRedirect : '/api/v1/videos',
+    failureRedirect : '/api/v1/user/login',
+    failureFlash : true
+})(req,res,next)
+}
+
+const getRegisterPage = async (req, res) =>{
+    res.status(200).render(path.join(__dirname,'..','views','register.ejs'))
+}
+
+const register = async (req, res) =>{
+    try {
+        const hashedPass = await bcrypt.hash(req.body.pass, 10);
+        const newUser = await User.create({
+            name : req.body.name,
+            email : req.body.email,
+            password : hashedPass
+        });
+        console.log(newUser);
+        res.status(201).redirect('/api/v1/user/login')
+    } catch (error) {
+        res.status(500).send(error)
+        
+    }
+}
 
 
 module.exports = {
@@ -119,4 +161,8 @@ module.exports = {
     streamVideo,
     updateVideo,
     deleteVideo,
+    getLoginPage,
+    login,
+    getRegisterPage,
+    register
 }

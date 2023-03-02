@@ -69,7 +69,7 @@ const uploadVideo = async (req, res)=>{
     try {
 
         const video = await Video.create(video_temp);
-        video_name=video.name+'.mp4';
+        video_name=video._id+'.mp4';
         let file;
       
         if (!req.files || Object.keys(req.files).length === 0) {
@@ -109,11 +109,9 @@ const bringVideo = async (req, res)=>{
 
 const streamVideo = async (req, res)=>{
     let range, videoPath, videoSize, chunkSize, start, end, readStream, contentLength;
-    const video = await Video.findOne({_id : req.params.id})
-    console.log(video.name)
     range = req.headers.range;
     if(!range) range='0';
-    videoPath = path.join(__dirname,'..', 'videos',video.name+'.mp4');
+    videoPath = path.join(__dirname,'..', 'videos',req.params.id+'.mp4');
     videoSize = fs.statSync(videoPath).size;
     chunkSize = 1000000;
     start = Number(range.replace(/\D/g, ""));

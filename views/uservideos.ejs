@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Your Videos</h1>
+    <ul id="videos">
+    </ul>
+    <!-- action="/user/manage/register", method="post" -->
+    <form id="createvideo" >
+        <label for="name"> Name: </label>
+        <input type="text" id="name" name="name" required>
+        <label for="desc">Description: </label>
+        <textarea id="desc" name="desc" rows="4" cols="50"></textarea>
+        <button type="submit">Create</button>
+    </form>
+
+    <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
+        <input name="uploaded" type="file" required>
+        <button type="submit">submit</button>
+    </form>
+
+    
+</body>
+<script>
+    const videolist = document.getElementById('videos');
+    const registerform = document.getElementById('createvideo');
+    const uploadform = document.getElementById('uploadform');
+
+    const listvideos = async () =>{
+            videolist.replaceChildren([]);
+            const res = await fetch(window.location.href, { method: 'post', headers : {'Content-Type' : 'application/json'}});
+
+            const videos=  await res.json()
+            
+
+            videos.userVideos.forEach(element => {
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.innerText = `${element.name} ${element.desc} ${element._id}`;
+                link.href = '/videos/' + element._id;
+                li.appendChild(link)
+                videolist.appendChild(li)
+            });
+
+        }
+        listvideos()
+        
+    registerform.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const name = document.getElementById('name').value
+        const desc = document.getElementById('desc').value;
+        const uploader = document.location.href.split('/')[4].replace('?','');
+        console.log("fileuploadeee")
+        console.log(uploader)
+
+        try {
+            await fetch('/user/manage/register',
+            {method : 'post', headers : {'Content-Type' : 'application/json'},
+            body : JSON.stringify({'name' : name, 'desc' : desc, 'uploader':uploader})})
+            listvideos();
+        } catch (error) {
+            console.log(error)
+        }
+        
+    })
+
+</script>
+</html>

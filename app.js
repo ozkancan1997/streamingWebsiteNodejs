@@ -35,7 +35,11 @@ app.use(passport.session())
 //app.patch(/api/v1/videos/:id) update a video
 //app.delete(/api/v1/videos/:id) delete a video
 //All in one
-app.use('/api/v1', tasks); 
+app.use('/', tasks);
+app.use((req, res)=>{
+    console.log(req.url)
+    res.status(404).render(path.join(__dirname,'views', 'notfound.ejs'), {url: req.url})
+}) 
 
 const start = async () => {
     try {

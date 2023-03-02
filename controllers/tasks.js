@@ -3,64 +3,93 @@ const User = require('../Models/User');
 const fs = require('fs');
 const path = require('path');
 const passport = require('passport')
-const localStrategy = require('passport-local')
 const bcrypt = require('bcrypt')
 const initializePassport = require('../passportconfig');
+let video_name;
+let video_temp;
 
-initializePassport(passport, (email) =>{
-    return User.findOne({email})
+initializePassport(passport,
+    async (email) =>{
+        return await User.findOne({email})
+    }, async (id) =>{
+        return  await User.findOne({_id : id})
 });
 
 path.resolve();
 
-const getIndex = (req, res) =>{
-    res.status(200).render(path.join(__dirname,'..','views','index.ejs'))
+const checkAuth = (req,res,next)=>{
+    if(req.isAuthenticated()){
+        next()
+    }else{
+        res.redirect('/user/login')
+    }
 }
 
-const getAllVideos = async (req, res)=>{
+const checkNotAuth = (req, res, next)=>{
+    if(!req.isAuthenticated()){
+        next()
+    }else{
+        res.redirect('/videos')
+    }
+}
+
+const getIndex = (req, res) =>{
+    res.status(200).render(path.join(__dirname,'..','views','index.ejs'), { name: req.user.name, id: req.user._id})
+}
+
+const queryVideos = async (req, res)=>{
     let allVideos;
     try {
         if(req.params.query=='*'){allVideos = await Video.find({});}
         else{allVideos = await Video.find({ name : req.params.query})}
-        console.log(req.params.query)
         res.status(200).json({allVideos});
     } catch (error) {
         res.status(500).json({message : error});
     }
 }
 
-const registerVideo = async (req, res)=>{
+const userVideos = async (req, res)=>{
+    console.log("niye burası?")
+    let userVideos;
     try {
-        const video = await Video.create(req.body);
-        res.status(201).json({video});
+        userVideos = await Video.find({ uploader : req.params.id})
+
+        res.status(200).json({userVideos});
+    } catch (error) {
+        res.status(500).json({message : error })
+    }
+}
+
+const registerVideo = async (req, res)=>{
+    video_temp = req.body;
+    res.status(200);
+}
+
+const uploadVideo = async (req, res)=>{
+    try {
+
+        const video = await Video.create(video_temp);
+        video_name=video.name+'.mp4';
+        let file;
+      
+        if (!req.files || Object.keys(req.files).length === 0) {
+          return res.status(400).send('No files were uploaded.');
+        }
+          
+        file = req.files.uploaded;
+        file.mv(path.join(__dirname,'..','videos',video_name), (err)=>{
+          if (err)
+            return res.status(500).send(err);
+        });
+    
+        res.status(201).json({message: "done"});
     } catch (error) {
         res.status(500).json({message : error});
     }
-}
 
-const uploadVideo = (req, res)=>{
-    let sampleFile;
-    let uploadPath;
-  
-    if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).send('No files were uploaded.');
-    }
-  
-    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
-    sampleFile = req.files.uploaded;
-    uploadPath = __dirname+'/../videos/' + sampleFile.name;
-    
-    // console.log(req.files);
-
-    // Use the mv() method to place the file somewhere on your server
-    sampleFile.mv(uploadPath, function(err) {
-      if (err)
-        return res.status(500).send(err);
-  
-      res.send('File uploaded!');
-    });
 
 }
+
 
 const bringVideo = async (req, res)=>{
     console.log("bring")
@@ -80,9 +109,11 @@ const bringVideo = async (req, res)=>{
 
 const streamVideo = async (req, res)=>{
     let range, videoPath, videoSize, chunkSize, start, end, readStream, contentLength;
+    const video = await Video.findOne({_id : req.params.id})
+    console.log(video.name)
     range = req.headers.range;
     if(!range) range='0';
-    videoPath = path.join(__dirname,'..', 'videos',req.params.id+'.mp4');
+    videoPath = path.join(__dirname,'..', 'videos',video.name+'.mp4');
     videoSize = fs.statSync(videoPath).size;
     chunkSize = 1000000;
     start = Number(range.replace(/\D/g, ""));
@@ -125,8 +156,8 @@ const getLoginPage = async (req, res)=>{
 const login = async (req,res,next) =>{
     console.log(req.body)
     passport.authenticate('local', {
-    successRedirect : '/api/v1/videos',
-    failureRedirect : '/api/v1/user/login',
+    successRedirect : '/videos',
+    failureRedirect : '/user/login',
     failureFlash : true
 })(req,res,next)
 }
@@ -144,19 +175,35 @@ const register = async (req, res) =>{
             password : hashedPass
         });
         console.log(newUser);
-        res.status(201).redirect('/api/v1/user/login')
+        res.status(201).redirect('/user/login')
     } catch (error) {
         res.status(500).send(error)
         
     }
 }
 
+const logout = (req, res)=>{
+    req.logOut((err)=>{
+        if(err) return console.log(err);
+        res.redirect('/user/login')
+    });
+    
+    
+}
+
+const getUserVideos = (req, res)=>{
+    res.status(200).render(path.join(__dirname,'..','views','uservideos.ejs'),{ id : req.user._id })
+}
+
 
 module.exports = {
     getIndex,
-    getAllVideos,
-    registerVideo,
+    checkAuth,
+    checkNotAuth,
+    queryVideos,
+    userVideos,
     uploadVideo,
+    registerVideo,
     bringVideo,
     streamVideo,
     updateVideo,
@@ -164,5 +211,7 @@ module.exports = {
     getLoginPage,
     login,
     getRegisterPage,
-    register
+    register,
+    logout,
+    getUserVideos
 }

@@ -7,11 +7,9 @@
     <title>Document</title>
 </head>
 <body>
-    <!-- <form action="/api/v1/videos/upload" enctype="multipart/form-data" method="post">
-    <input name="uploaded" type="file">
-    <button>Submit</button> -->
     <div>
-    <h1>Videos</h1>
+    <h1>Hello <%= name %></h1>
+    <h2>Videos</h2>
     <ul id="videos">
     </ul>
 
@@ -19,6 +17,8 @@
     <input placeholder="" name="q" type="text" id="searchbar">
     <button type="submit">Submit</button>
     </form>
+    <form action="/user/logout" id="logoutform"><button id="logoutButton" type="submit">Logout</button></form>
+    <form id="myvideos" action="/user/<%=id%>" method="get"><button>My Videos</button type="submit"></form>
     </div>
     <script>
         let searchForm = document.getElementById('search');
@@ -30,7 +30,7 @@
             let query;
             if(bar.value) query=bar.value;
             else query='*'
-            const res = await fetch('/api/v1/videos/search/'+query, {headers : {'Content-Type' : 'application/json'}});
+            const res = await fetch('/videos/search/'+query, {headers : {'Content-Type' : 'application/json'}});
             const videos=  await res.json()
             
 
@@ -38,7 +38,7 @@
                 const li = document.createElement('li');
                 const link = document.createElement('a');
                 link.innerText = `${element.name} ${element.desc} ${element._id}`;
-                link.href = '/api/v1/videos/' + element._id;
+                link.href = '/videos/' + element._id;
                 li.appendChild(link)
                 videolist.appendChild(li)
             });
@@ -52,7 +52,7 @@
             e.preventDefault();
             listvideos()
         })
-        
+    
 
     </script>
 </form>

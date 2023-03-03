@@ -8,7 +8,9 @@
 </head>
 <body>
     <video controls id="video" enctype="multipart/form-data" method="post"></video>
-
+    <h1><%=name%></h1>
+    <h2><%=uploader%></h2>
+    <p><%=desc%></p>
     <script>
         const video = document.getElementById('video')
         video.src = window.location.href+'/watch';

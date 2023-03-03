@@ -10,26 +10,37 @@
     <h1>Your Videos</h1>
     <ul id="videos">
     </ul>
-    <!-- action="/user/manage/register", method="post" -->
-    <form id="createvideo" >
+    <button onclick="listvideos()">Refresh</button>
+    <button onclick="switchCreate()">Create Video</button>
+    <h3 id="mode"></h3>
+
+    <form id="registerform" action="/user/manage/register" method="post">
         <label for="name"> Name: </label>
         <input type="text" id="name" name="name" required>
         <label for="desc">Description: </label>
-        <textarea id="desc" name="desc" rows="4" cols="50"></textarea>
-        <button type="submit">Create</button>
+        <textarea id="desc" name="desc" rows="4" cols="50" form="registerform" required></textarea>
+        <input type="hidden" id="uploader" name="uploader" readonly>
+        <button id="registerButton" type="submit">Register</button>
     </form>
-
-    <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
-        <input name="uploaded" type="file" required>
-        <button type="submit">submit</button>
-    </form>
-
+        <button id="updateButton">Update</button>
     
+    <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
+        <input id="uploaded" name="uploaded" type="file" required disabled>
+        <button id="uploadButton" name="uploadButton" type="submit" disabled>Upload</button>
+    </form>
+
 </body>
 <script>
     const videolist = document.getElementById('videos');
-    const registerform = document.getElementById('createvideo');
+    const registerform = document.getElementById('registerform');
     const uploadform = document.getElementById('uploadform');
+    const modeHeader = document.getElementById('mode');
+    const updateButton = document.getElementById('updateButton'); updateButton.disabled=true;
+    const registerButton = document.getElementById('registerButton'); registerButton.disabled=true;
+    const uploaded = document.getElementById('uploaded');
+    const uploadButton = document.getElementById('uploadButton')
+
+    document.getElementById('uploader').value=document.location.href.split('/')[4].replace('?','');
 
     const listvideos = async () =>{
             videolist.replaceChildren([]);
@@ -39,35 +50,102 @@
             
 
             videos.userVideos.forEach(element => {
+                const div = document.createElement('div');
                 const li = document.createElement('li');
                 const link = document.createElement('a');
+                const delbutton = document.createElement('button')
+                const upbutton = document.createElement('button')
                 link.innerText = `${element.name} ${element.desc} ${element._id}`;
                 link.href = '/videos/' + element._id;
+                delbutton.name=element._id;
+                delbutton.addEventListener('click', (e)=>{
+                    e.preventDefault()
+                    modeHeader.innerText=""
+                    updateButton.disabled=true;
+                    delFetch(delbutton.name)
+                })
+                delbutton.innerText = 'Delete'
+                upbutton.name=element._id;
+                upbutton.addEventListener('click', (e)=>{
+                    e.preventDefault();
+                    modeHeader.innerText=`Update: ID: ${element._id} - Name: ${element.name}`
+                    updateButton.disabled=false;
+                    registerButton.disabled=true;
+                    uploaded.disabled=true;
+                    uploadButton.disabled=true;
+                    updateButton.name=element._id;
+                    console.log(updateButton.name)
+                })
+                upbutton.innerText= 'Update';
                 li.appendChild(link)
+                li.appendChild(upbutton)
+                li.appendChild(delbutton)
+                div.appendChild(li);
                 videolist.appendChild(li)
             });
 
         }
         listvideos()
         
-    registerform.addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        const name = document.getElementById('name').value
-        const desc = document.getElementById('desc').value;
-        const uploader = document.location.href.split('/')[4].replace('?','');
-        console.log("fileuploadeee")
-        console.log(uploader)
+        registerform.addEventListener('submit', (e)=>{
 
-        try {
-            await fetch('/user/manage/register',
-            {method : 'post', headers : {'Content-Type' : 'application/json'},
-            body : JSON.stringify({'name' : name, 'desc' : desc, 'uploader':uploader})})
+            uploaded.disabled=false;
+            uploadButton.disabled=false;
+
+        })
+
+        const delFetch = async (id)=>{
+            await fetch('/user/manage/delete/'+id,{ method: 'delete'})
             listvideos();
-        } catch (error) {
-            console.log(error)
         }
         
-    })
+        updateButton.addEventListener('click', async (e)=>{
+            e.preventDefault();
+             await upFetch(updateButton.name)
+        })
+
+        const upFetch = async (id)=>{
+            
+            const name = document.getElementById('name').value
+            const desc = document.getElementById('desc').value;
+            const uploader = document.getElementById('uploader').value;
+            try {
+            await fetch('/user/manage/update/'+id,
+            {method : 'PATCH', headers : {'Content-Type' : 'application/json'},
+            body : JSON.stringify({'name' : name, 'desc' : desc, 'uploader':uploader})})
+            listvideos()
+            } catch (error) {
+                console.log(error)
+            }
+            
+            
+        }
+
+        const switchCreate = ()=>{
+            registerButton.disabled=false;
+            modeHeader.innerText="Create Video"
+            updateButton.disabled=true;
+            registerButton.disabled=false;
+        }
+
+    // registerform.addEventListener('submit', async (e)=>{
+    //     e.preventDefault();
+    //     const name = document.getElementById('name').value
+    //     const desc = document.getElementById('desc').value;
+    //     const uploader = document.location.href.split('/')[4].replace('?','');
+    //     console.log("fileuploadeee")
+    //     console.log(uploader)
+
+    //     try {
+    //         await fetch('/user/manage/register',
+    //         {method : 'post', headers : {'Content-Type' : 'application/json'},
+    //         body : JSON.stringify({'name' : name, 'desc' : desc, 'uploader':uploader})})
+    //         listvideos();
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+        
+    // })
 
 </script>
 </html>

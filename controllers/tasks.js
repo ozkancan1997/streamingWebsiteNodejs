@@ -5,6 +5,7 @@ const path = require('path');
 const passport = require('passport')
 const bcrypt = require('bcrypt')
 const initializePassport = require('../passportconfig');
+const asyncWrapper = require("../middlewares/asyncWrapper");
 let video_name;
 let video_temp;
 
@@ -37,76 +38,60 @@ const getIndex = (req, res) =>{
     res.status(200).render(path.join(__dirname,'..','views','index.ejs'), { name: req.user.name, id: req.user._id})
 }
 
-const queryVideos = async (req, res)=>{
+const queryVideos = asyncWrapper( async (req, res)=>{
     let allVideos;
-    try {
-        if(req.params.query=='*'){allVideos = await Video.find({});}
-        else{allVideos = await Video.find({ name : req.params.query})}
-        res.status(200).json({allVideos});
-    } catch (error) {
-        res.status(500).json({message : error});
-    }
-}
+    let pattern = `.*${req.params.query}.*`;
+    if(req.params.query=='*'){allVideos = await Video.find({});}
+    else{allVideos = await Video.find({$or : [{ name : {$regex:pattern, $options:'ig'}}, { uploader : {$regex:pattern, $options:'ig'} }]})}
+    res.status(200).json({allVideos});
+})
 
-const userVideos = async (req, res)=>{
+const userVideos = asyncWrapper( async (req, res)=>{
     let userVideos;
-    try {
-        userVideos = await Video.find({ uploader : req.params.id})
+    userVideos = await Video.find({ uploader : req.params.id})
+    const uploader = await User.findOne({_id : req.params.id})
+    res.status(200).json({userVideos, uploader: uploader.name});
+})
 
-        res.status(200).json({userVideos});
-    } catch (error) {
-        res.status(500).json({message : error })
-    }
-}
-
-const registerVideo = async (req, res)=>{
+const registerVideo = asyncWrapper( async (req, res, next)=>{
     video_temp = req.body;
     console.log(video_temp)
-}
+    return;
+})
 
-const uploadVideo = async (req, res)=>{
-    try {
+const uploadVideo = asyncWrapper( async (req, res)=>{
 
-        const video = await Video.create(video_temp);
-        console.log(video)
-        video_name=video._id+'.mp4';
-        let file;
-      
-        if (!req.files || Object.keys(req.files).length === 0) {
-          return res.status(400).send('No files were uploaded.');
-        }
-          
-        file = req.files.uploaded;
-        file.mv(path.join(__dirname,'..','videos',video_name), (err)=>{
-          if (err)
-            return res.status(500).send(err);
-        });
+    const video = await Video.create(video_temp);
+    console.log(video)
+    video_name=video._id+'.mp4';
+    let file;
     
-        res.status(201).redirect('/user/'+req.user._id);
-    } catch (error) {
-        res.status(500).json({message : error});
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send('No files were uploaded.');
+    }
+        
+    file = req.files.uploaded;
+    file.mv(path.join(__dirname,'..','videos',video_name), (err)=>{
+        if (err)
+        return res.status(500).send(err);
+    });
+
+    res.status(201).redirect('/user/'+req.user._id);
+
+})
+
+
+const bringVideo = asyncWrapper( async (req, res)=>{
+    const videoID = req.params.id;
+    const video = await Video.findOneAndUpdate({_id : videoID}, {$inc:{views : 1}},{new : true});
+    const uploader = await User.findOne({_id : video.uploader})
+    if(!video){
+        res.status(404).json({message : "No such video"});
+        return;
     }
 
-
-}
-
-
-const bringVideo = async (req, res)=>{
-    //console.log("bring")
-    const videoID = req.params.id;
-    try {
-        const video = await Video.findOne({_id : videoID});
-        const uploader = await User.findOne({_id : video.uploader})
-        if(!video){
-            res.status(404).json({message : "No such video"});
-            return;
-        }
-        //console.log("ulaşıldı")
-        res.status(200).render(path.join(__dirname,'..','views','stream.ejs'),{ name : video.name, desc : video.desc, uploader : uploader.name})
-    } catch (error) {
-        res.status(500).json({ message : error});
-    }    
-}
+    res.status(200).render(path.join(__dirname,'..','views','stream.ejs'),{ name : video.name, desc : video.desc, uploader : uploader.name, views : video.views})   
+})
 
 const streamVideo = async (req, res)=>{
     let range, videoPath, videoSize, chunkSize, start, end, readStream, contentLength;
@@ -130,35 +115,30 @@ const streamVideo = async (req, res)=>{
     //console.log("video")
 }
 
-const updateVideo = async (req, res)=>{
-    try {
-        console.log(req.url)
-        const video = await Video.findOneAndUpdate({_id : req.params.id}, req.body, {new: true ,runValidators: true})
-        console.log(video)
-        res.status(200).send({message:'OK'});
-    } catch (error) {
-        res.status(500).send({message:error})
-    }
-}
+const updateVideo = asyncWrapper( async (req, res)=>{
 
-const deleteVideo = async (req, res)=>{
+    console.log(req.url)
+    const video = await Video.findOneAndUpdate({_id : req.params.id}, req.body, {new: true ,runValidators: true})
+    console.log(video)
+    res.status(200).send({message:'OK'});
+
+})
+
+const deleteVideo = asyncWrapper( async (req, res)=>{
     const videoID = req.params.id;
-    console.log('hello ')
-    try {
-        const deletedVideo = await Video.findOneAndDelete({_id : videoID});
-        if(!deletedVideo){
-            res.status(404).json({ message : "No such video"});
-            return;
-        }
-        fs.unlink(path.join(__dirname, '..', 'videos', videoID+'.mp4'), (err)=>{
-            if(err) console.log(err);
-            else console.log("Deleted")
-        })
-        res.status(200).json({ deletedVideo });
-    } catch (error) {
-        res.status(500).json({ message : error});
+
+    const deletedVideo = await Video.findOneAndDelete({_id : videoID});
+    if(!deletedVideo){
+        res.status(404).json({ message : "No such video"});
+        return;
     }
-}
+    fs.unlink(path.join(__dirname, '..', 'videos', videoID+'.mp4'), (err)=>{
+        if(err) console.log(err);
+        else console.log("Deleted")
+    })
+    res.status(200).json({ deletedVideo });
+
+})
 
 const getLoginPage = async (req, res)=>{
     res.status(200).render(path.join(__dirname,'..','views','login.ejs'))
@@ -177,21 +157,17 @@ const getRegisterPage = async (req, res) =>{
     res.status(200).render(path.join(__dirname,'..','views','register.ejs'))
 }
 
-const register = async (req, res) =>{
-    try {
-        const hashedPass = await bcrypt.hash(req.body.pass, 10);
-        const newUser = await User.create({
-            name : req.body.name,
-            email : req.body.email,
-            password : hashedPass
-        });
-        //console.log(newUser);
-        res.status(201).redirect('/user/login')
-    } catch (error) {
-        res.status(500).send(error)
-        
-    }
-}
+const register = asyncWrapper( async (req, res) =>{
+
+    const hashedPass = await bcrypt.hash(req.body.pass, 10);
+    await User.create({
+        name : req.body.name,
+        email : req.body.email,
+        password : hashedPass
+    });
+    res.status(201).redirect('/user/login')
+
+})
 
 const logout = (req, res)=>{
     req.logOut((err)=>{
@@ -203,6 +179,7 @@ const logout = (req, res)=>{
 }
 
 const getUserVideos = (req, res)=>{
+    console.log(req.user)
     res.status(200).render(path.join(__dirname,'..','views','uservideos.ejs'),{ id : req.user._id })
 }
 

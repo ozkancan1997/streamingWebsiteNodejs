@@ -12,14 +12,15 @@
     <% if(messages.error){ %>
         <h3 style="color:red"><%=messages.error%></h3>
     <%}%>
-    <form action="/user/login" method="post">
+    <form id="loginform" action="/user/login" method="post">
         <label for="email"> Email: </label>
-        <input type="text" id="email" name="email" required>
+        <input type="email" id="email" name="email" required>
         <label for="pass">Password: </label>
         <input type="password" id="pass" name="pass" required>
         <button id="loginbutton" type="submit">Login</button>
     </form>
     <a href="/user/register">Register</a>
+
 
 </body>
 </html>

@@ -5,82 +5,142 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+
+        h1{
+            background-color: blue;
+            color: white;
+        }
+
+        a{
+            text-decoration: none;
+            font-size: 20px;
+        }
+
+        .videocontainer{
+            width: 50%;
+            height: 600px;
+            overflow: scroll;
+            display: inline-block;
+            background-color: rgb(153, 204, 255);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .iocontainer{
+            width: 49%;
+            height: 600px;
+            display: inline-block;
+            vertical-align: top;
+            background-color: rgb(153, 204, 255);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .label{
+            width: 100px;
+            display: inline-block;
+        }
+
+        #desc{
+            vertical-align: top;
+        }
+
+        #uploadform{
+            margin-top: 15px;
+        }
+
+        ul{
+            list-style-type: none;
+        }
+
+        li{
+            background-color: rgb(102, 153, 255);
+            height: 30px;
+            margin: 5px;
+        }
+
+        li:hover{
+            background-color: rgb(0, 0, 255);
+        }
+
+        li:hover a{
+            color:white;
+        }
+
+    </style>
 </head>
 <body>
     <h1>Your Videos</h1>
-    <ul id="videos">
-    </ul>
-    <button onclick="listvideos()">Refresh</button>
-    <button onclick="switchCreate()">Create Video</button>
-    <h3 id="mode"></h3>
+    <div class="videocontainer">
+        <ul id="videos">
+        </ul>
+    </div>
+    <div class="iocontainer">
+        
+        <button onclick="switchCreate()">Create Video</button>
+        <button onclick="switchUpdate()" id="updatevideobutton" type="button">Update Video</button>
+        <button onclick="delFetch()" id="deleteButton" type="button">Delete Video</button>
+        <h3 id="mode"></h3>
 
-    <form id="registerform" action="/user/manage/register" method="post">
-        <label for="name"> Name: </label>
-        <input type="text" id="name" name="name" required>
-        <label for="desc">Description: </label>
-        <textarea id="desc" name="desc" rows="4" cols="50" form="registerform" required></textarea>
-        <input type="hidden" id="uploader" name="uploader" readonly>
-        <button id="registerButton" type="submit">Register</button>
-    </form>
-        <button id="updateButton">Update</button>
-    
-    <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
-        <input id="uploaded" name="uploaded" type="file" required disabled>
-        <button id="uploadButton" name="uploadButton" type="submit" disabled>Upload</button>
-    </form>
-
+        <form id="registerform" action="/user/manage/register" method="post">
+            <label class="label" for="name"> Name: </label>
+            <input type="text" id="name" name="name" required><br> <br>
+            <label class="label" for="desc">Description: </label>
+            <textarea id="desc" name="desc" rows="4" cols="50" form="registerform" required></textarea>
+            <input type="hidden" id="uploader" name="uploader" readonly>
+            <button id="registerButton" type="submit">Register</button>
+            <button id="updateButton">Update</button>
+        </form>
+            
+        
+        <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
+            <input accept=".mp4" id="uploaded" name="uploaded" type="file" required disabled>
+            <button id="uploadButton" name="uploadButton" type="submit" disabled>Upload</button>
+        </form>
+    </div>
 </body>
 <script>
     const videolist = document.getElementById('videos');
     const registerform = document.getElementById('registerform');
     const uploadform = document.getElementById('uploadform');
     const modeHeader = document.getElementById('mode');
+    const updateVideoButton = document.getElementById('updatevideobutton')
     const updateButton = document.getElementById('updateButton'); updateButton.disabled=true;
     const registerButton = document.getElementById('registerButton'); registerButton.disabled=true;
     const uploaded = document.getElementById('uploaded');
     const uploadButton = document.getElementById('uploadButton')
+    const name = document.getElementById('name');
+    const desc = document.getElementById('desc');
+    let radio;
 
-    document.getElementById('uploader').value=document.location.href.split('/')[4].replace('?','');
+    document.getElementById('uploader').value=document.location.href.split('/')[4].replace('?', '');
 
     const listvideos = async () =>{
             videolist.replaceChildren([]);
             const res = await fetch(window.location.href, { method: 'post', headers : {'Content-Type' : 'application/json'}});
 
             const videos=  await res.json()
-            
+            const uploader_name = videos.uploader;
 
             videos.userVideos.forEach(element => {
-                const div = document.createElement('div');
                 const li = document.createElement('li');
                 const link = document.createElement('a');
-                const delbutton = document.createElement('button')
-                const upbutton = document.createElement('button')
-                link.innerText = `${element.name} ${element.desc} ${element._id}`;
+                const radio = document.createElement('input');
+                radio.type='radio';
+                radio.className="radiobutton";
+                radio.name="radiobutton"
+                radio.dataset.id=element._id;
+                radio.dataset.name=element.name;
+                radio.dataset.desc=element.desc;
+                link.innerText = `${element.name} Uploader: ${uploader_name} views: ${element.views}`;
                 link.href = '/videos/' + element._id;
-                delbutton.name=element._id;
-                delbutton.addEventListener('click', (e)=>{
-                    e.preventDefault()
-                    modeHeader.innerText=""
-                    updateButton.disabled=true;
-                    delFetch(delbutton.name)
-                })
-                delbutton.innerText = 'Delete'
-                upbutton.name=element._id;
-                upbutton.addEventListener('click', (e)=>{
+                li.appendChild(radio);
+                li.appendChild(link);
+                li.addEventListener('click', (e)=>{
                     e.preventDefault();
-                    modeHeader.innerText=`Update: ID: ${element._id} - Name: ${element.name}`
-                    updateButton.disabled=false;
-                    registerButton.disabled=true;
-                    uploaded.disabled=true;
-                    uploadButton.disabled=true;
-                    updateButton.name=element._id;
-                    console.log(updateButton.name)
+                    li.childNodes[0].checked=true;
                 })
-                upbutton.innerText= 'Update';
-                li.appendChild(link)
-                li.appendChild(upbutton)
-                li.appendChild(delbutton)
-                div.appendChild(li);
                 videolist.appendChild(li)
             });
 
@@ -94,25 +154,52 @@
 
         })
 
-        const delFetch = async (id)=>{
-            await fetch('/user/manage/delete/'+id,{ method: 'delete'})
+
+
+        const switchUpdate = ()=>{
+            console.log("switchupdate")
+            let selected
+            radio = document.getElementsByName('radiobutton');
+            for(let i of radio){if(i.checked) {selected = i}};
+            modeHeader.innerText=`Update: ID: ${selected.dataset.id} - Name: ${selected.dataset.name}`
+            updateButton.disabled=false;
+            registerButton.disabled=true;
+            uploaded.disabled=true;
+            uploadButton.disabled=true;
+            name.value=selected.dataset.name;
+            desc.value=selected.dataset.desc;
+        }
+
+        
+        const delFetch = async ()=>{
+            updateButton.disabled=true;
+            uploadButton.disabled=true;
+            registerButton.disabled=true;
+            name.value="";
+            desc.value="";
+            let selected;
+            radio = document.getElementsByName('radiobutton');
+            for(let i of radio){if(i.checked) {selected = i}};
+            await fetch('/user/manage/delete/'+selected.dataset.id,{ method: 'delete'})
             listvideos();
         }
         
         updateButton.addEventListener('click', async (e)=>{
             e.preventDefault();
-             await upFetch(updateButton.name)
+            await upFetch(updateButton.name)
         })
 
         const upFetch = async (id)=>{
             
-            const name = document.getElementById('name').value
-            const desc = document.getElementById('desc').value;
-            const uploader = document.getElementById('uploader').value;
+            name = document.getElementById('name');
+            desc = document.getElementById('desc');
+            const uploader = document.getElementById('uploader');
+            if(!name.checkValidity()) return name.reportValidity();
+            if(!desc.checkValidity()) return desc.reportValidity();
             try {
             await fetch('/user/manage/update/'+id,
             {method : 'PATCH', headers : {'Content-Type' : 'application/json'},
-            body : JSON.stringify({'name' : name, 'desc' : desc, 'uploader':uploader})})
+            body : JSON.stringify({'name' : name.value, 'desc' : desc.value, 'uploader':uploader.value})})
             listvideos()
             } catch (error) {
                 console.log(error)
@@ -122,30 +209,13 @@
         }
 
         const switchCreate = ()=>{
+            name.value="";
+            desc.value="";
             registerButton.disabled=false;
             modeHeader.innerText="Create Video"
             updateButton.disabled=true;
             registerButton.disabled=false;
         }
-
-    // registerform.addEventListener('submit', async (e)=>{
-    //     e.preventDefault();
-    //     const name = document.getElementById('name').value
-    //     const desc = document.getElementById('desc').value;
-    //     const uploader = document.location.href.split('/')[4].replace('?','');
-    //     console.log("fileuploadeee")
-    //     console.log(uploader)
-
-    //     try {
-    //         await fetch('/user/manage/register',
-    //         {method : 'post', headers : {'Content-Type' : 'application/json'},
-    //         body : JSON.stringify({'name' : name, 'desc' : desc, 'uploader':uploader})})
-    //         listvideos();
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-        
-    // })
 
 </script>
 </html>

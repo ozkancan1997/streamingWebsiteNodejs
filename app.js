@@ -9,10 +9,17 @@ const flash = require('express-flash')
 const session = require('express-session');
 const passport = require('passport');
 const errorHandler = require('./middlewares/errorHandler');
+const fs = require('fs')
 
 if(process.env.NODE_ENV !== 'production') require('dotenv').config();
 
+
+fs.mkdir('./videos',(err)=>{
+    if(err) console.log(err);
+});
+
 app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname,'views')))
 app.use(express.urlencoded({extended : false}))
 app.use(express.json());
 app.use(upload({
@@ -28,14 +35,6 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-
-
-//app.get(/api/v1/videos) list all videos
-//app.post(/api/v1/videos) upload a video
-//app.get(/api/v1/videos/:id) watch a video
-//app.patch(/api/v1/videos/:id) update a video
-//app.delete(/api/v1/videos/:id) delete a video
-//All in one
 app.use('/', tasks);
 app.use((req, res)=>{
     console.log(req.url)

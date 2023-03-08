@@ -4,74 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-
-        h1{
-            background-color: blue;
-            color: white;
-        }
-
-        a{
-            text-decoration: none;
-            font-size: 20px;
-        }
-
-        .videocontainer{
-            width: 50%;
-            height: 600px;
-            overflow: scroll;
-            display: inline-block;
-            background-color: rgb(153, 204, 255);
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        .iocontainer{
-            width: 49%;
-            height: 600px;
-            display: inline-block;
-            vertical-align: top;
-            background-color: rgb(153, 204, 255);
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .label{
-            width: 100px;
-            display: inline-block;
-        }
-
-        #desc{
-            vertical-align: top;
-        }
-
-        #uploadform{
-            margin-top: 15px;
-        }
-
-        ul{
-            list-style-type: none;
-        }
-
-        li{
-            background-color: rgb(102, 153, 255);
-            height: 30px;
-            margin: 5px;
-        }
-
-        li:hover{
-            background-color: rgb(0, 0, 255);
-        }
-
-        li:hover a{
-            color:white;
-        }
-
-    </style>
+    <title>Your Videos</title>
+    <link rel="stylesheet" href="/uservideos.css" type="text/css">
 </head>
 <body>
     <h1>Your Videos</h1>
+    <a id="returnlink" href="/videos">Return</a>
     <div class="videocontainer">
         <ul id="videos">
         </ul>
@@ -84,10 +22,10 @@
         <h3 id="mode"></h3>
 
         <form id="registerform" action="/user/manage/register" method="post">
-            <label class="label" for="name"> Name: </label>
-            <input type="text" id="name" name="name" required><br> <br>
-            <label class="label" for="desc">Description: </label>
-            <textarea id="desc" name="desc" rows="4" cols="50" form="registerform" required></textarea>
+            <label for="name"> Name: </label>
+            <input maxlength="50" type="text" id="name" name="name" required><br> <br>
+            <label for="desc">Description: </label>
+            <textarea maxlength="500" id="desc" name="desc" rows="4" cols="50" form="registerform" required></textarea>
             <input type="hidden" id="uploader" name="uploader" readonly>
             <button id="registerButton" type="submit">Register</button>
             <button id="updateButton">Update</button>
@@ -95,6 +33,7 @@
             
         
         <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
+            <label name="uploadedLabel" id="uploadedLabel" for="uploaded">File: </label>
             <input accept=".mp4" id="uploaded" name="uploaded" type="file" required disabled>
             <button id="uploadButton" name="uploadButton" type="submit" disabled>Upload</button>
         </form>
@@ -186,21 +125,21 @@
         
         updateButton.addEventListener('click', async (e)=>{
             e.preventDefault();
-            await upFetch(updateButton.name)
+            let selected;
+            radio = document.getElementsByName('radiobutton');
+            for(let i of radio){if(i.checked) {selected = i}};
+            await upFetch(selected.dataset.id)
         })
 
         const upFetch = async (id)=>{
-            
-            name = document.getElementById('name');
-            desc = document.getElementById('desc');
             const uploader = document.getElementById('uploader');
             if(!name.checkValidity()) return name.reportValidity();
             if(!desc.checkValidity()) return desc.reportValidity();
             try {
-            await fetch('/user/manage/update/'+id,
-            {method : 'PATCH', headers : {'Content-Type' : 'application/json'},
-            body : JSON.stringify({'name' : name.value, 'desc' : desc.value, 'uploader':uploader.value})})
-            listvideos()
+                await fetch('/user/manage/update/'+id,
+                {method : 'PATCH', headers : {'Content-Type' : 'application/json'},
+                body : JSON.stringify({'name' : name.value, 'desc' : desc.value, 'uploader':uploader.value})})
+                listvideos()
             } catch (error) {
                 console.log(error)
             }

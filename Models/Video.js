@@ -8,7 +8,7 @@ const videoSchema = new mongoose.Schema({ name : {
 }, desc : {
     type : String,
     required : true,
-    maxLength : 150,
+    maxLength : 500,
     trim : true
 }, uploader : {
     type: String,

@@ -40,9 +40,11 @@ const getIndex = (req, res) =>{
 
 const queryVideos = asyncWrapper( async (req, res)=>{
     let allVideos;
-    let pattern = `.*${req.params.query}.*`;
-    if(req.params.query=='*'){allVideos = await Video.find({});}
-    else{allVideos = await Video.find({$or : [{ name : {$regex:pattern, $options:'ig'}}, { uploader : {$regex:pattern, $options:'ig'} }]})}
+    if(!req.query.keyword){allVideos = await Video.find({});}
+    else{
+        let pattern = `.*${req.query.keyword}.*`;
+        allVideos = await Video.find({$or : [{ name : {$regex:pattern, $options:'ig'}}, { uploader : {$regex:pattern, $options:'ig'} }]})
+    }
     res.status(200).json({allVideos});
 })
 
@@ -178,7 +180,7 @@ const logout = (req, res)=>{
     
 }
 
-const getUserVideos = (req, res)=>{
+const getUserPage = (req, res)=>{
     console.log(req.user)
     res.status(200).render(path.join(__dirname,'..','views','uservideos.ejs'),{ id : req.user._id })
 }
@@ -201,5 +203,5 @@ module.exports = {
     getRegisterPage,
     register,
     logout,
-    getUserVideos
+    getUserPage
 }

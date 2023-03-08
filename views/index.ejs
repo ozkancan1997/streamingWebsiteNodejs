@@ -4,22 +4,34 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Index</title>
+    <link rel="stylesheet" href="/index.css" type="text/css">
 </head>
 <body>
-    <div>
-    <h1>Hello <%= name %></h1>
-    <h2>Videos</h2>
-    <ul id="videos">
-    </ul>
+    <div class="content">
+        <header>
+            <h1>Videos</h1>
+            <div id="userpanel">
+                <p class="greet">Hello <%= name %></p>
+                <form action="/user/logout" id="logoutform"><button id="logoutButton" type="submit">Logout</button></form>
+                <form id="myvideos" action="/user/<%=id%>" method="get"><button>My Videos</button type="submit"></form>
+            </div>
+            <hr>
+            <form name="search" id="search" >
+                <input placeholder="" name="q" type="text" id="searchbar">
+                <button id="searchbutton" type="submit">Search</button>
+            </form>
+            
+        </header>
 
-    <form name="search" id="search" >
-    <input placeholder="" name="q" type="text" id="searchbar">
-    <button type="submit">Submit</button>
-    </form>
-    <form action="/user/logout" id="logoutform"><button id="logoutButton" type="submit">Logout</button></form>
-    <form id="myvideos" action="/user/<%=id%>" method="get"><button>My Videos</button type="submit"></form>
+        <div>
+            <ul id="videos">
+            </ul>
+        </div>
     </div>
+    <footer>
+        <a class="footerlink" href="https://www.flaticon.com/free-icons/video-player" title="video player icons">Video player icons created by Freepik - Flaticon</a>
+    </footer>
     <script>
         let searchForm = document.getElementById('search');
         let bar = document.getElementById('searchbar');
@@ -27,19 +39,30 @@
 
         const listvideos = async () =>{
             videolist.replaceChildren([])
-            let query;
-            if(bar.value) query=bar.value;
-            else query='*'
-            const res = await fetch('/videos/search/'+query, {headers : {'Content-Type' : 'application/json'}});
+            let query="";
+            if(bar.value){
+                query=`?keyword=${bar.value}`;
+            }
+            const res = await fetch('/videos'+query, {method : 'POST', headers : {'Content-Type' : 'application/json'}});
             const videos=  await res.json()
             
 
             videos.allVideos.forEach(element => {
+                const div = document.createElement('div');
                 const li = document.createElement('li');
                 const link = document.createElement('a');
-                link.innerText = `${element.name} ${element.desc} ${element._id}`;
+                const descP = document.createElement('p');
+                const viewsP = document.createElement('p');
+                li.style.overflow = 
+                link.innerText = element.name;
+                descP.innerText = element.desc;
+                descP.className = 'desc';
+                viewsP.innerText = `Views\n${element.views}`;
+                viewsP.className = 'views';
                 link.href = '/videos/' + element._id;
                 li.appendChild(link)
+                li.appendChild(descP);
+                li.appendChild(viewsP);
                 videolist.appendChild(li)
             });
 

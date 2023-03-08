@@ -19,7 +19,8 @@ npm start
 
 ## Attribution
 
-Video player icons created by [Freepik - Flaticon](https://www.flaticon.com/free-icons/video-player)
+Video player icons created by [Freepik - Flaticon](https://www.flaticon.com/free-icons/video-player)     
+
 Free Stock photos by [Vecteezy](https://www.vecteezy.com/free-photos)
 
 

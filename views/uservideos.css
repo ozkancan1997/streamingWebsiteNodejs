@@ -1,5 +1,6 @@
 body{
     font-family: Verdana, sans-serif;
+    background: url('background.JPG') no-repeat center center fixed;
 }
 
 h1{

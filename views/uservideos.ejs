@@ -8,43 +8,70 @@
     <link rel="stylesheet" href="/uservideos.css" type="text/css">
 </head>
 <body>
-    <h1>Your Videos</h1>
-    <a id="returnlink" href="/videos">Return</a>
+    <h1>Your Videos<a id="returnlink" href="/videos">Return</a></h1>
+    
     <div class="videocontainer">
         <ul id="videos">
         </ul>
     </div>
-    <div class="iocontainer">
-        
-        <button onclick="switchCreate()">Create Video</button>
-        <button onclick="switchUpdate()" id="updatevideobutton" type="button">Update Video</button>
-        <button onclick="delFetch()" id="deleteButton" type="button">Delete Video</button>
-        <h3 id="mode"></h3>
-
-        <form id="registerform" action="/user/manage/register" method="post">
-            <label for="name"> Name: </label>
-            <input maxlength="50" type="text" id="name" name="name" required><br> <br>
-            <label for="desc">Description: </label>
-            <textarea maxlength="500" id="desc" name="desc" rows="4" cols="50" form="registerform" required></textarea>
-            <input type="hidden" id="uploader" name="uploader" readonly>
-            <button id="registerButton" type="submit">Register</button>
-            <button id="updateButton">Update</button>
-        </form>
+    <div class="rightside">
+        <div class="iocontainer">
             
-        
-        <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
-            <label name="uploadedLabel" id="uploadedLabel" for="uploaded">File: </label>
-            <input accept=".mp4" id="uploaded" name="uploaded" type="file" required disabled>
-            <button id="uploadButton" name="uploadButton" type="submit" disabled>Upload</button>
-        </form>
+            <button onclick="switchCreate()">Create Video</button>
+            <button onclick="switchUpdate()" id="updatevideobutton" type="button">Update Video</button>
+            <button onclick="delFetch()" id="deleteButton" type="button">Delete Video</button>
+            <h3 id="mode"></h3>
+
+            <form id="registerform" action="/user/manage/register" method="post">
+                <label for="name"> Name: </label>
+                <input maxlength="50" type="text" id="name" name="name" required><br> <br>
+                <label for="desc">Description: </label>
+                <textarea maxlength="500" id="desc" name="desc" rows="4" cols="50" form="registerform" required></textarea>
+                <input type="hidden" id="uploader" name="uploader" value="<%= id%>" readonly>
+                <button id="registerButton" type="submit">Register</button>
+                <button id="updateButton">Update</button>
+            </form>
+                
+            
+            <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
+                <label>File: </label>
+                <input accept=".mp4" name="uploaded" id="uploaded" type="file" required disabled>
+                <!-- <label id="uploadedLabel" name="uploadedLabel" for="uploaded">Choose A Video File</label> -->
+                <button id="uploadButton" name="uploadButton" type="submit" disabled>Upload</button>
+            </form>
+
+            
+        </div>
+
+        <div class="iocontainer">
+            <label id="managelabel">Manage</label>
+
+            
+            <br><input type="password" id="managepass" name="managepass" placeholder="Current Password" required>
+            <p id="managemessage"></p><br>
+            <div>
+                <input id="newpass" placeholder="New Password" type="password"><br>
+                <input id="newpass2" placeholder="New Password Again" type="password">
+                <button onclick="changePassword()" id="changepass" type="button" >Change Password</button>
+                <button onclick="deleteAccount()" id="delaccbutton" type="button" >Delete Account</button>
+            </div>
+            
+            
+
+
+        </div>
     </div>
+    <footer>
+        <a class="footerlink" href="https://www.flaticon.com/free-icons/video-player" title="video player icons">Video player icons created by Freepik - Flaticon</a>
+        <a href="https://www.vecteezy.com/free-photos">Free Stock photos by Vecteezy</a>
+    </footer>
 </body>
 <script>
     const videolist = document.getElementById('videos');
     const registerform = document.getElementById('registerform');
     const uploadform = document.getElementById('uploadform');
     const modeHeader = document.getElementById('mode');
-    const updateVideoButton = document.getElementById('updatevideobutton')
+    const updateVideoButton = document.getElementById('updatevideobutton');
     const updateButton = document.getElementById('updateButton'); updateButton.disabled=true;
     const registerButton = document.getElementById('registerButton'); registerButton.disabled=true;
     const uploaded = document.getElementById('uploaded');
@@ -52,8 +79,13 @@
     const name = document.getElementById('name');
     const desc = document.getElementById('desc');
     let radio;
-
-    document.getElementById('uploader').value=document.location.href.split('/')[4].replace('?', '');
+    const uploader = document.getElementById('uploader');
+    const managePath = `/user/${uploader.value}/account`;
+    const manageInput = document.getElementById('managepass');
+    const manageMessage = document.getElementById('managemessage');
+    const deleteAccountButton = document.getElementById('delaccbutton');
+    const changePassButton = document.getElementById('changepass');
+    const newPass = document.getElementById('newpass');
 
     const listvideos = async () =>{
             videolist.replaceChildren([]);
@@ -79,6 +111,8 @@
                 li.addEventListener('click', (e)=>{
                     e.preventDefault();
                     li.childNodes[0].checked=true;
+                    updateVideoButton.disabled=false;
+                    deleteButton.disabled=false;
                 })
                 videolist.appendChild(li)
             });
@@ -92,43 +126,56 @@
             uploadButton.disabled=false;
 
         })
-
-
-
-        const switchUpdate = ()=>{
-            console.log("switchupdate")
-            let selected
-            radio = document.getElementsByName('radiobutton');
-            for(let i of radio){if(i.checked) {selected = i}};
-            modeHeader.innerText=`Update: ID: ${selected.dataset.id} - Name: ${selected.dataset.name}`
-            updateButton.disabled=false;
-            registerButton.disabled=true;
-            uploaded.disabled=true;
-            uploadButton.disabled=true;
-            name.value=selected.dataset.name;
-            desc.value=selected.dataset.desc;
-        }
-
         
         const delFetch = async ()=>{
             updateButton.disabled=true;
             uploadButton.disabled=true;
             registerButton.disabled=true;
+            deleteButton.disabled=true;
+            uploaded.value="";
+            uploaded.disabled=true;
             name.value="";
             desc.value="";
-            let selected;
             radio = document.getElementsByName('radiobutton');
-            for(let i of radio){if(i.checked) {selected = i}};
-            await fetch('/user/manage/delete/'+selected.dataset.id,{ method: 'delete'})
-            listvideos();
+            for(let i of radio){if(i.checked) {
+                await fetch('/user/manage/delete/'+i.dataset.id,{ method: 'delete'})
+                listvideos();
+                break;
+            }};  
+            deleteButton.disabled=false;
         }
         
-        updateButton.addEventListener('click', async (e)=>{
-            e.preventDefault();
-            let selected;
+
+        const switchUpdate = ()=>{
+            console.log("switchupdate")
             radio = document.getElementsByName('radiobutton');
-            for(let i of radio){if(i.checked) {selected = i}};
-            await upFetch(selected.dataset.id)
+            name.value="";
+            desc.value="";
+            for(let i of radio){
+                if(i.checked) {
+                modeHeader.innerText=`Update: ID: ${i.dataset.id} - Name: ${i.dataset.name}`
+                updateButton.disabled=false;
+                name.value=i.dataset.name;
+                desc.value=i.dataset.desc;
+                break;
+                }
+                
+            };
+            registerButton.disabled=true;
+            uploaded.disabled=true;
+            uploaded.value="";
+            uploadButton.disabled=true;
+        }
+
+
+        updateButton.addEventListener('click', async (e)=>{
+            updateButton.disabled=true;
+            e.preventDefault();
+            radio = document.getElementsByName('radiobutton');
+            for(let i of radio){if(i.checked) {
+                await upFetch(i.dataset.id)
+                return;
+            }};
         })
 
         const upFetch = async (id)=>{
@@ -143,8 +190,6 @@
             } catch (error) {
                 console.log(error)
             }
-            
-            
         }
 
         const switchCreate = ()=>{
@@ -153,8 +198,47 @@
             registerButton.disabled=false;
             modeHeader.innerText="Create Video"
             updateButton.disabled=true;
-            registerButton.disabled=false;
         }
+
+        const deleteAccount = async ()=>{
+            if(!manageInput.checkValidity()){
+                return manageInput.reportValidity();
+           }
+            manageInput.disabled=true;
+            deleteAccountButton.disabled=true;
+            const res = await fetch(managePath, {method:"POST", headers : {'Content-Type' : 'application/json'}, body: JSON.stringify({ 'managepass' : manageInput.value})});
+            const body = await res.json();
+            console.log(body);
+            if(body.result){
+                await fetch('/user/logout');
+                document.location.reload();
+
+            }
+            manageMessage.innerText = "Wrong Password";
+            manageInput.disabled=false;
+            deleteAccountButton.disabled=false;
+        }
+
+        const changePassword = async ()=>{
+            if(!manageInput.checkValidity()){
+                return manageInput.reportValidity();
+            }
+
+            if(newPass.value !== document.getElementById('newpass2').value){
+                manageMessage.innerText = 'Passwords do not match'
+                return;
+            }
+
+            manageInput.disabled=true;
+            changePassButton.disabled=true;
+            const res = await fetch(managePath, {method:"PATCH", headers : {'Content-Type' : 'application/json'}, body: JSON.stringify({ 'managepass': manageInput.value, 'newpass' : newPass.value})});
+            const body = await res.json();
+            if(body.result){
+                await fetch('/user/logout');
+                document.location.reload();
+            }  
+        }
+
 
 </script>
 </html>

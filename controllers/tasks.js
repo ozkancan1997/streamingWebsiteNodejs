@@ -122,7 +122,7 @@ const updateVideo = asyncWrapper( async (req, res)=>{
     console.log(req.url)
     const video = await Video.findOneAndUpdate({_id : req.params.id}, req.body, {new: true ,runValidators: true})
     console.log(video)
-    res.status(200).send({message:'OK'});
+    res.status(202).send({message:'OK'});
 
 })
 
@@ -147,7 +147,7 @@ const getLoginPage = async (req, res)=>{
 }
 
 const login = async (req,res,next) =>{
-    //console.log(req.body)
+    console.log(req.body)
     passport.authenticate('local', {
     successRedirect : '/videos',
     failureRedirect : '/user/login',
@@ -176,14 +176,45 @@ const logout = (req, res)=>{
         if(err) return console.log(err);
         res.redirect('/user/login')
     });
-    
-    
 }
 
 const getUserPage = (req, res)=>{
     console.log(req.user)
     res.status(200).render(path.join(__dirname,'..','views','uservideos.ejs'),{ id : req.user._id })
 }
+
+const confirm = asyncWrapper(async (req, res, next)=>{
+    const user = await User.findOne({_id : req.user._id});
+    console.log(req.body.managepass + " " + req.user._id);
+    if(!(await bcrypt.compare(req.body.managepass, user.password))){
+        console.log("compared")
+        return res.status(401).json({ result : false});
+    }
+    next();
+})
+
+const deleteAccount = asyncWrapper(async (req, res)=>{
+    const deleted = await User.findOneAndDelete({_id : req.user._id});
+    const videos = await Video.find({uploader : deleted._id})
+    console.log(videos);
+    await Video.deleteMany({uploader : deleted._id});
+
+    for(let v of videos){
+        fs.unlink(path.join(__dirname, '..', 'videos', v._id+'.mp4'), (err)=>{
+            if(err) console.log(err);
+            else console.log("Deleted")
+        })
+    }
+    res.status(200).json({result : true});
+})
+
+const changePass = asyncWrapper(async (req, res)=>{
+    const hashedPass = await bcrypt.hash(req.body.newpass, 10);
+    await User.findOneAndUpdate({_id : req.user._id}, {password : hashedPass}, {new: true ,runValidators: true})
+    res.status(202).json({result : true});
+})
+
+
 
 
 module.exports = {
@@ -203,5 +234,8 @@ module.exports = {
     getRegisterPage,
     register,
     logout,
-    getUserPage
+    getUserPage,
+    confirm,
+    deleteAccount,
+    changePass
 }

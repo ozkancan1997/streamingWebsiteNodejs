@@ -16,7 +16,10 @@ const {getIndex,
     getRegisterPage,
     logout,
     getUserPage,
-    userVideos} = require('../controllers/tasks');
+    userVideos,
+    confirm,
+    deleteAccount,
+    changePass} = require('../controllers/tasks');
 
 router.route('/videos').get(checkAuth, getIndex).post(checkAuth, queryVideos);;
 router.route('/videos/:id').get(checkAuth, bringVideo);
@@ -25,6 +28,7 @@ router.route('/user/login').get(checkNotAuth, getLoginPage).post(login);
 router.route('/user/register').get(checkNotAuth, getRegisterPage).post(register);
 router.route('/user/logout').get(logout);
 router.route('/user/:id').get(checkAuth, getUserPage).post(userVideos)
+router.route('/user/:id/account').post(confirm, deleteAccount).patch(confirm, changePass);
 router.route('/user/manage/upload').post(uploadVideo)
 router.route('/user/manage/register').post(registerVideo);
 router.route('/user/manage/delete/:id').delete(deleteVideo);

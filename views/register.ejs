@@ -4,18 +4,22 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Register</title>
+    <link rel="stylesheet" href="/loginregister.css">
 </head>
 <body>
-    <form action="/user/register" method="post">
-        <label for="name">Name: </label>
-        <input type="text" id="name" name="name" required>
-        <label for="email">Email: </label>
-        <input type="email" id="email" name="email" required>
-        <label for="pass">Password: </label>
-        <input type="password" id="pass" name="pass" required>
-        <button type="submit">Register</button>
-    </form>
-    <a href="/user/login">Login</a>
+    <div class="content">
+        <h1>Register</h1>
+        <form action="/user/register" method="post">
+            <label for="name">Name: </label>
+            <input type="text" id="name" name="name" required>
+            <label for="email">Email: </label>
+            <input type="email" id="email" name="email" required>
+            <label for="pass">Password: </label>
+            <input type="password" id="pass" name="pass" required>
+            <div class="buttondiv"><button type="submit">Register</button></div>         
+        </form>
+        <a href="/user/login">Login</a>
+    </div>
 </body>
 </html>

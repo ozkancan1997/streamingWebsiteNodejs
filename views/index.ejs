@@ -37,6 +37,7 @@
         let searchForm = document.getElementById('search');
         let bar = document.getElementById('searchbar');
         let videolist = document.getElementById('videos')
+        let waiting;
 
         const listvideos = async () =>{
             videolist.replaceChildren([])
@@ -44,9 +45,10 @@
             if(bar.value){
                 query=`?keyword=${bar.value}`;
             }
+            waiting=true;
             const res = await fetch('/videos'+query, {method : 'POST', headers : {'Content-Type' : 'application/json'}});
             const videos=  await res.json()
-            
+            waiting=false;
 
             videos.allVideos.forEach(element => {
                 const div = document.createElement('div');
@@ -74,6 +76,7 @@
 
         searchForm.addEventListener('submit', async (e)=>{
             e.preventDefault();
+            if(waiting) return;
             listvideos()
         })
     

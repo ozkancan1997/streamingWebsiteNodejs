@@ -43,7 +43,7 @@ const queryVideos = asyncWrapper( async (req, res)=>{
     if(!req.query.keyword){allVideos = await Video.find({});}
     else{
         let pattern = `.*${req.query.keyword}.*`;
-        allVideos = await Video.find({$or : [{ name : {$regex:pattern, $options:'ig'}}, { uploader : {$regex:pattern, $options:'ig'} }]})
+        allVideos = await Video.find({$or : [{ name : {$regex:pattern, $options:'ig'}}, { desc : {$regex:pattern, $options:'ig'} }]})
     }
     res.status(200).json({allVideos});
 })
@@ -51,8 +51,7 @@ const queryVideos = asyncWrapper( async (req, res)=>{
 const userVideos = asyncWrapper( async (req, res)=>{
     let userVideos;
     userVideos = await Video.find({ uploader : req.params.id})
-    const uploader = await User.findOne({_id : req.params.id})
-    res.status(200).json({userVideos, uploader: uploader.name});
+    res.status(200).json({userVideos});
 })
 
 const registerVideo = asyncWrapper( async (req, res, next)=>{
@@ -92,7 +91,7 @@ const bringVideo = asyncWrapper( async (req, res)=>{
         return;
     }
 
-    res.status(200).render(path.join(__dirname,'..','views','stream.ejs'),{ name : video.name, desc : video.desc, uploader : uploader.name, views : video.views})   
+    res.status(200).render(path.join(__dirname,'..','views','stream.ejs'),{ id:req.user._id, name : video.name, desc : video.desc, uploader : uploader.name, views : video.views})   
 })
 
 const streamVideo = async (req, res)=>{

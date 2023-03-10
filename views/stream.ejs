@@ -5,13 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="/stream.css">
 </head>
 <body>
-    <video controls id="video" enctype="multipart/form-data" method="post"></video>
-    <h1><%=name%></h1>
-    <h2><%=uploader%></h2>
-    <p><%=desc%></p>
-    <p><%=views%></p>
+    
+    <div id="videodiv">
+        <video controls id="video" enctype="multipart/form-data" method="post"></video>
+    </div>
+    <div id="rightside">
+        <div id="userpanel">
+            <a id="returnlink" href="/videos">Return</a>
+            <form id="myvideos" action="/user/<%=id%>" method="get"><button>My Videos</button type="submit"></form>
+            <form action="/user/logout" id="logoutform"><button id="logoutButton" type="submit">Logout</button></form>
+        </div>
+        <div id="infodiv">
+            <h1 id="name"><%=name%></h1>
+            <div id="mics"><p id="uploader">Uploader: <%=uploader%></p><p id="views">Views: <%=views%></p></div>
+
+            <p id="desc"><%=desc%></p>
+        </div>
+    </div>
+    <footer>
+        <a class="footerlink" href="https://www.flaticon.com/free-icons/video-player" title="video player icons">Video player icons created by Freepik - Flaticon</a>
+    </footer>  
     <script>
         const video = document.getElementById('video')
         video.src = window.location.href+'/watch';

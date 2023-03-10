@@ -1,18 +1,22 @@
 body{
     font-family: Verdana, sans-serif;
-    background: url('background.JPG') no-repeat center center fixed;
+    background-color: rgb(29, 28, 28);
+}
+
+header{
+    background-color: rgb(0, 35, 150);
+    color: white;
+    height: 60px;
+    padding: 5px;
+    box-sizing: border-box;
+    display: inline-block;
+    width: 100%;
 }
 
 h1{
-    background-color: rgb(0, 35, 150);
-    color: white;
     display: inline-block;
-    width: 100%;
-    position: relative;
-    height: 60px;
-    margin-top: 5px;
-    padding: 5px;
-    box-sizing: border-box;
+    width: 93%;
+    margin: auto; 
 }
 
 a{
@@ -25,13 +29,9 @@ a{
     border: 2px solid white;
     background-color: rgb(0, 0, 255);
     border-radius: 10px;
-    position: absolute;
-    top: 0;
-    right: 0px;
     padding: 8px;
     font-weight: 700;
     color:white;
-    margin: 5px 5px 0 0;
 }
 
 #returnlink:hover{
@@ -42,7 +42,22 @@ a{
     background-color: rgb(33, 44, 201);
 }
 
+#outerdiv{
+    width: 100%;
+    text-align: center;
+}
+
+#buttondiv{
+    display: inline-block;
+    width: 130px;
+}
+
+#buttondiv>button{
+    margin-top: 5px;
+}
+
 .videocontainer{
+    text-align: left;
     width: 50%;
     height: 755px;
     overflow: scroll;
@@ -53,6 +68,7 @@ a{
 }
 
 .iocontainer{
+
     height: 375px;
     background-color: rgb(0, 0, 255, 0.281);
     padding: 20px;
@@ -61,6 +77,7 @@ a{
 }
 
 .rightside{
+    text-align: left;
     width: 49%;
     display: inline-block;
     vertical-align: top;
@@ -74,6 +91,7 @@ label{
     color:white;
     font-weight: 600;
     padding: 2px;
+    border-radius: 10px;
 }
 
 p{

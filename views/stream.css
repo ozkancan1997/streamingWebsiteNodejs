@@ -1,0 +1,155 @@
+body{
+    font-family: Verdana, sans-serif;
+    background-color: rgb(29, 28, 28);
+}
+
+#videodiv{
+    display: inline-block;
+    width: 70%;
+}
+
+video{
+    width: 100%;
+    margin: auto;
+}
+
+form{
+    display: inline;
+}
+
+
+#rightside{
+    display: inline-block;
+    width: 29%;
+    margin: auto;
+    vertical-align: top;
+}
+
+#userpanel{
+    display: inline-block;
+    width: 100%;
+    text-align: right;
+    background-color: rgb(0, 35, 150);
+    height: 60px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#infodiv{
+    background-color: rgba(0, 0, 255, 0.281);
+    height: 700px;
+    width: 100%;
+    display: inline-block;
+    align-items: center;
+}
+
+#desc{
+    overflow: scroll;
+    margin: auto;
+    max-width: 95%;
+    height: 70%;
+    background-color: rgba(153, 0, 255, 0.623);
+    padding: 10px;
+    box-sizing: border-box;
+    color: white;
+    font-size: 18px;
+}
+
+#name{
+    text-align: center;
+}
+
+h1{
+    overflow-wrap: break-word;
+    background-color: rgba(0, 0, 255, 0.575);
+    padding: 5px;
+    color: white;
+    border-radius: 10px;
+    margin: 20px 5px 20px 5px;;
+}
+
+p{
+    border-radius: 10px;
+}
+
+#mics{
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#mics>p{
+    display: inline-block;
+    margin: 0 20px 0 20px;
+    background-color: rgb(0, 0, 255, 0.575);
+    padding: 5px;
+    color: white;
+    font-size: 20px;
+    overflow-wrap: break-word;
+}
+
+button{
+    width: 100px;
+    height: 25px;
+    font-size: 14px;
+    background-color: rgb(0, 0, 255);
+    border: 2px solid rgb(255, 255, 255);
+    border-radius: 10px;
+    font-weight: 700;
+    vertical-align: middle;
+    color: white;
+}
+
+#returnlink{
+    border: 2px solid white;
+    background-color: rgb(0, 0, 255);
+    border-radius: 10px;
+    font-weight: 700;
+    color:white;
+    padding: 5px;
+    width: 150px;
+    text-decoration: none;
+    font-size: 17px;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#returnlink:hover{
+    background-color: rgb(22, 31, 145);
+}
+
+#returnlink:active{
+    background-color: rgb(33, 44, 201);
+}
+
+button:hover{
+    background-color: rgb(22, 31, 145);
+    color:white;
+}
+
+button:active{
+    background-color: rgb(33, 44, 201);
+    color:white;
+}
+
+footer{
+    position: fixed;
+    bottom : 0;
+    left :0;
+    width: 100%;
+    height: 40px;
+    text-align: center;
+    background-color: rgb(0, 35, 150);
+}
+
+footer>a{
+    color:white;
+    width: 30%;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+footer>a:hover, a{
+    background-color: unset;
+    color:white;
+}

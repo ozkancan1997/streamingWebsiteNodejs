@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-id = <%=id%>>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,62 +8,70 @@
     <link rel="stylesheet" href="/uservideos.css" type="text/css">
 </head>
 <body>
-    <h1>Your Videos<a id="returnlink" href="/videos">Return</a></h1>
+    <header>
+        <h1>Your Videos</h1>
+        <a id="returnlink" href="/videos">Return</a>
+    </header>
     
-    <div class="videocontainer">
-        <ul id="videos">
-        </ul>
-    </div>
-    <div class="rightside">
-        <div class="iocontainer">
-            
-            <button onclick="switchCreate()">Create Video</button>
-            <button onclick="switchUpdate()" id="updatevideobutton" type="button">Update Video</button>
-            <button onclick="delFetch()" id="deleteButton" type="button">Delete Video</button>
-            <h3 id="mode"></h3>
+    
 
-            <form id="registerform" action="/user/manage/register" method="post">
-                <label for="name"> Name: </label>
-                <input maxlength="50" type="text" id="name" name="name" required><br> <br>
-                <label for="desc">Description: </label>
-                <textarea maxlength="500" id="desc" name="desc" rows="4" cols="50" form="registerform" required></textarea>
-                <input type="hidden" id="uploader" name="uploader" value="<%= id%>" readonly>
-                <button id="registerButton" type="submit">Register</button>
-                <button id="updateButton">Update</button>
-            </form>
-                
-            
-            <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
-                <label>File: </label>
-                <input accept=".mp4" name="uploaded" id="uploaded" type="file" required disabled>
-                <!-- <label id="uploadedLabel" name="uploadedLabel" for="uploaded">Choose A Video File</label> -->
-                <button id="uploadButton" name="uploadButton" type="submit" disabled>Upload</button>
-            </form>
-
-            
+    <div id="outerdiv">
+        <div class="videocontainer">
+            <ul id="videos">
+            </ul>
         </div>
+        <div class="rightside">
+            <div class="iocontainer">
+                
+                <button onclick="switchCreate()">Create Video</button>
+                <button onclick="switchUpdate()" id="updatevideobutton" type="button">Update Video</button>
+                <button onclick="delFetch()" id="deleteButton" type="button">Delete Video</button>
+                <h3 id="mode"></h3>
 
-        <div class="iocontainer">
-            <label id="managelabel">Manage</label>
+                <form id="registerform" action="/user/manage/register" method="post">
+                    <label for="name"> Name: </label>
+                    <input maxlength="50" type="text" id="name" name="name" required><br> <br>
+                    <label for="desc">Description: </label>
+                    <textarea maxlength="500" id="desc" name="desc" rows="4" cols="50" form="registerform" required></textarea>
+                    <input type="hidden" id="uploader" name="uploader" value="<%= id%>" readonly>
+                    <div id="buttondiv">
+                        <button id="registerButton" type="submit">Register</button>
+                        <button id="updateButton">Update</button>
+                    </div>
+                </form>
+                    
+                
+                <form id="uploadform" name="uploadform" action="/user/manage/upload" enctype="multipart/form-data" method="post">
+                    <label>File: </label>
+                    <input accept=".mp4" name="uploaded" id="uploaded" type="file" required disabled>
+                    <!-- <label id="uploadedLabel" name="uploadedLabel" for="uploaded">Choose A Video File</label> -->
+                    <button id="uploadButton" name="uploadButton" type="submit" disabled>Upload</button>
+                </form>
 
-            
-            <br><input type="password" id="managepass" name="managepass" placeholder="Current Password" required>
-            <p id="managemessage"></p><br>
-            <div>
-                <input id="newpass" placeholder="New Password" type="password"><br>
-                <input id="newpass2" placeholder="New Password Again" type="password">
-                <button onclick="changePassword()" id="changepass" type="button" >Change Password</button>
-                <button onclick="deleteAccount()" id="delaccbutton" type="button" >Delete Account</button>
+                
             </div>
-            
-            
+
+            <div class="iocontainer">
+                <label id="managelabel">Manage</label>
+
+                
+                <br><input type="password" id="managepass" name="managepass" placeholder="Current Password" required>
+                <p id="managemessage"></p><br>
+                <div>
+                    <input id="newpass" placeholder="New Password" type="password"><br>
+                    <input id="newpass2" placeholder="New Password Again" type="password">
+                    <button onclick="changePassword()" id="changepass" type="button" >Change Password</button>
+                    <button onclick="deleteAccount()" id="delaccbutton" type="button" >Delete Account</button>
+                </div>
+                
+                
 
 
+            </div>
         </div>
     </div>
     <footer>
         <a class="footerlink" href="https://www.flaticon.com/free-icons/video-player" title="video player icons">Video player icons created by Freepik - Flaticon</a>
-        <a href="https://www.vecteezy.com/free-photos">Free Stock photos by Vecteezy</a>
     </footer>
 </body>
 <script>
@@ -79,8 +87,7 @@
     const name = document.getElementById('name');
     const desc = document.getElementById('desc');
     let radio;
-    const uploader = document.getElementById('uploader');
-    const managePath = `/user/${uploader.value}/account`;
+    const managePath = `/user/<%=id%>/account`;
     const manageInput = document.getElementById('managepass');
     const manageMessage = document.getElementById('managemessage');
     const deleteAccountButton = document.getElementById('delaccbutton');
@@ -91,8 +98,7 @@
             videolist.replaceChildren([]);
             const res = await fetch(window.location.href, { method: 'post', headers : {'Content-Type' : 'application/json'}});
 
-            const videos=  await res.json()
-            const uploader_name = videos.uploader;
+            const videos=  await res.json();
 
             videos.userVideos.forEach(element => {
                 const li = document.createElement('li');
@@ -104,7 +110,7 @@
                 radio.dataset.id=element._id;
                 radio.dataset.name=element.name;
                 radio.dataset.desc=element.desc;
-                link.innerText = `${element.name} Uploader: ${uploader_name} views: ${element.views}`;
+                link.innerText = `${element.name} - views: ${element.views}`;
                 link.href = '/videos/' + element._id;
                 li.appendChild(radio);
                 li.appendChild(link);
@@ -179,13 +185,12 @@
         })
 
         const upFetch = async (id)=>{
-            const uploader = document.getElementById('uploader');
             if(!name.checkValidity()) return name.reportValidity();
             if(!desc.checkValidity()) return desc.reportValidity();
             try {
                 await fetch('/user/manage/update/'+id,
                 {method : 'PATCH', headers : {'Content-Type' : 'application/json'},
-                body : JSON.stringify({'name' : name.value, 'desc' : desc.value, 'uploader':uploader.value})})
+                body : JSON.stringify({'name' : name.value, 'desc' : desc.value, 'uploader':'<%=id%>'})})
                 listvideos()
             } catch (error) {
                 console.log(error)

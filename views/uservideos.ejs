@@ -187,10 +187,11 @@
         const upFetch = async (id)=>{
             if(!name.checkValidity()) return name.reportValidity();
             if(!desc.checkValidity()) return desc.reportValidity();
+            const uploader = '<%=id%>';
             try {
                 await fetch('/user/manage/update/'+id,
                 {method : 'PATCH', headers : {'Content-Type' : 'application/json'},
-                body : JSON.stringify({'name' : name.value, 'desc' : desc.value, 'uploader':'<%=id%>'})})
+                body : JSON.stringify({'name' : name.value, 'desc' : desc.value, 'uploader': uploader})})
                 listvideos()
             } catch (error) {
                 console.log(error)

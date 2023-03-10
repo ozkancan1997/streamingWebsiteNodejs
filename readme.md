@@ -4,7 +4,7 @@ This is a streaming website I made for my internship. Aryom Software, Feb. 10th 
 
 ## Installation
 
-Use npm to install dependencies. You need an environment variable that contains "MONGODB_URI" and "SESSION_SECRET".
+You need to install Node.js first. Use npm to install dependencies. You need an environment variable that contains "MONGODB_URI" and "SESSION_SECRET".
 
 ```bash
 npm install

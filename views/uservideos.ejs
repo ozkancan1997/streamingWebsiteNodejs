@@ -99,6 +99,7 @@
             const res = await fetch(window.location.href, { method: 'post', headers : {'Content-Type' : 'application/json'}});
 
             const videos=  await res.json();
+            console.log(videos);
 
             videos.userVideos.forEach(element => {
                 const li = document.createElement('li');
@@ -239,9 +240,14 @@
             changePassButton.disabled=true;
             const res = await fetch(managePath, {method:"PATCH", headers : {'Content-Type' : 'application/json'}, body: JSON.stringify({ 'managepass': manageInput.value, 'newpass' : newPass.value})});
             const body = await res.json();
+            console.log(body.result)
             if(body.result){
                 await fetch('/user/logout');
                 document.location.reload();
+            }else{
+                manageMessage.innerText = "Wrong Password"
+                manageInput.disabled=false;
+                changePassButton.disabled=false;
             }  
         }
 

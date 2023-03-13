@@ -187,6 +187,10 @@ button:not(:disabled):active{
     margin: 30px 0 30px 0;
 }
 
+#managemessage, #mode{
+    color:white;
+}
+
 .iocontainer input{
     width:300px;
     margin: 5px 0 5px 0;
